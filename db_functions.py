@@ -2,6 +2,11 @@ import sqlite3
 from time import sleep
 
 def set_connection():
+    '''
+    Устанавливает соединение с базой данных. Пробует сделать запрос к таблице.
+    Если таблица существует, то ничего не происходит, если таблицы нет, то создает ее.
+    Возвращает объект подключения к базе данных. 
+    '''
     connection = sqlite3.connect("settings.db")
     curs = connection.cursor()
     try:
@@ -18,6 +23,13 @@ def set_connection():
 
 
 def check_in_db(token):
+    '''
+    Проверяет введеные данные в основной программе. Если уже есть в БД, то возвращает словарь 
+    с соответствующими языком и секретным ключом и статусом проверки.
+    Статус 1 - нет в бд
+    Статус 2 - есть в бд
+    
+    '''
     res = {'status': 1, 'lang': None, 'secret' : None}
     conn = set_connection()
     curs = conn.cursor()
@@ -33,6 +45,9 @@ def check_in_db(token):
 
 
 def add_data(token, language, secret):
+    '''
+    Добавляет данные в таблицу в бд.    
+    '''
     conn = set_connection()
     curs = conn.cursor()
     id = get_last_id(curs)
@@ -42,6 +57,9 @@ def add_data(token, language, secret):
 
 
 def get_last_id(curs):
+    '''
+        Получает ID последней записи и возвращает ID который необходимо записать. 
+    '''
     id = 0
     res = curs.execute("SELECT * FROM info;").fetchall()
     if len(res) == 0:
@@ -52,6 +70,12 @@ def get_last_id(curs):
 
 
 def check_token(token : str):
+    '''
+        Делает пробный запрос к серверу. Проверяет статус код запроса.
+        Если код 200, функция возвращает 0, тем самым подтверждая валидность
+        API-ключа. Возвращает 1 если статус код запроса отличен от 200. 
+    '''
+
     res = 0
     import requests
     import json
@@ -69,18 +93,27 @@ def check_token(token : str):
 
 
 def auth():
+    '''
+    Функция авторизации. Запрашивает ввод API-ключа. Если такой уже есть в базе данных,
+    то записывает соответствующие язык и секретный ключ в словарь. Если API-ключа нет в базе данных,
+    то просит ввести препдпочтительный язык и секретный ключ, после ввода заносит информацию в БД.
+    Возвращает словарь в котором записаны токен, язык и секретный ключ. 
+    '''
     for i in range(3, 0, -1):
         token = input(f"Введите ваш 'API-ключ'(Попытка {i})\nЕго можно найти по адресу https://dadata.ru/profile/#info (Ctrl + клик по ссылке)\n>>> ")
         sleep(2)
         print('\n')
+        # делаем проверку на валидность токена
         if check_token(token) == 0:
+            # делаем проверку на нахождение токена в БД
             check = check_in_db(token)
-            if check['status'] == 0:
+            if check['status'] == 0: # если токен есть в базе данных то присваиваем переменным language и secret соответствующие значения из словаря check
                 language = check['lang']
                 secret = check['secret']
                 print('Авторизация прошла успешно! Вы в эфире!\n')
                 break
             else:
+                # если нет то просим их ввести и заносим в базу данных.
                 print("Я вижу что Ваш API-ключ рабочий, но нужно дополнить информацию о Вас.\n")
                 language = input("Введите язык на котором хотели бы получать названия городов(ru - русский, en - английский)\n>>> ")
                 print("\n")
@@ -89,7 +122,8 @@ def auth():
                 add_data(token, language, secret)
                 print("Информация дополнена! Вы в эфире!\n")
                 break
-        else:
+        else: # если токен невалидный, то пишем ошибку 
             print("Упс, произошла ошибка. Убедитесь что API-ключ зарегистрирован на ресурсе и введен правильно.\n")
+            
     
     return {'token': token, 'lang':language, 'secret': secret}
