@@ -13,6 +13,7 @@ def set_connection():
             language VARCHAR(2),
             secret VARCHAR(200)
         );''')
+        connection.commit()
     return connection
 
 
@@ -69,22 +70,26 @@ def check_token(token : str):
 
 def auth():
     for i in range(3, 0, -1):
-        token = input(f"Enter your token(you have {i} attempts): \n>>>")
+        token = input(f"Введите ваш 'API-ключ'(Попытка {i})\nЕго можно найти по адресу https://dadata.ru/profile/#info (Ctrl + клик по ссылке)\n>>> ")
         sleep(2)
+        print('\n')
         if check_token(token) == 0:
             check = check_in_db(token)
             if check['status'] == 0:
                 language = check['lang']
                 secret = check['secret']
-                print('Authorization is successful!')
+                print('Авторизация прошла успешно! Вы в эфире!\n')
                 break
             else:
-                language = input("Enter preferred language(ru - Russian, en - English): ")
-                secret = input("Введите ваш 'Секретный ключ' по адресу\nhttps://dadata.ru/profile/#info (Ctrl + клик по ссылке)\n")
+                print("Я вижу что Ваш API-ключ рабочий, но нужно дополнить информацию о Вас.\n")
+                language = input("Введите язык на котором хотели бы получать названия городов(ru - русский, en - английский)\n>>> ")
+                print("\n")
+                secret = input("Введите ваш 'Секретный ключ'\nЕго можно найти по адресу https://dadata.ru/profile/#info (Ctrl + клик по ссылке)\n>>> ")
+                print('\n')
                 add_data(token, language, secret)
-                print("You're registered! Good luck!")
+                print("Информация дополнена! Вы в эфире!\n")
                 break
         else:
-            print("This token is not authorized, enter your token again.\n")
+            print("Упс, произошла ошибка. Убедитесь что API-ключ зарегистрирован на ресурсе и введен правильно.\n")
     
     return {'token': token, 'lang':language, 'secret': secret}
