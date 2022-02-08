@@ -1,5 +1,3 @@
-from time import sleep
-from dadata import Dadata
 from db_functions import *
 from dadata_client import *
 
