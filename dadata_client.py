@@ -38,7 +38,7 @@ def event_loop(client, language):
                         number = input(">>> ")
                         number = int(number)
                 if number == 0:
-                    query = input("Введите запрос(город, улица, номер дома, номер квартиры):\n>>> ")
+                    query = input("Введите запрос(город, улица, номер дома, номер квартиры | 'off' - выйти из клиента):\n>>> ")
                 else:
                     if number < 0 or number > len(res):
                         print(f"Ошибка! Число находится вне допустимого диапазона! Введите число от 1 до {len(res)}")
@@ -47,7 +47,9 @@ def event_loop(client, language):
                     flag = 0
             else:
                 print("По вашему запросу ничего не найдено")
-                query = input('Введите запрос заново(город, улица, номер дома, номер квартиры):\n>>> ')
+                query = input("Введите запрос заново(город, улица, номер дома, номер квартиры | 'off' - выйти из клиента):\n>>> ")
+        if query == 'off':
+            break
         result = client.clean('address', query)
         print(f"Адрес: {result['result']}, Долгота: {result['geo_lon']}, широта: {result['geo_lat']}")
         repeat = input("Продолжим?(да/нет)\n>>> ")
