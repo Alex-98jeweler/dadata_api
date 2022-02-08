@@ -1,3 +1,2 @@
 dadata
-sqlalchemy
 requests
