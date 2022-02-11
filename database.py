@@ -1,30 +1,6 @@
 import sqlite3
 
 class DB:
-
-    def __init__(self, name) -> None:
-        connection = sqlite3.connect(name)
-        self.curs = connection.cursor()
-
-class DB_Reader(DB):
-    
-    def get_config(self) -> dict:
-        config = {
-            'token': None, 
-            'lang': None, 
-            'secret' : None
-        }
-        res = self.curs.execute('select * from settings;').fetchall()
-        config['token'] = res[0][1]
-        config['lang'] = res[0][2]
-        config['config'] = res[0][3]
-        self.curs.close()
-
-        return config
-
-
-class DB_Writer(DB):
-
     __create_query  = \
             '''
             CREATE TABLE settings (
@@ -40,7 +16,24 @@ class DB_Writer(DB):
             INSERT INTO settings VALUES(1, '{}', '{}', '{}');
 
             '''
-       
+
+    def __init__(self, name) -> None:
+        self.connection = sqlite3.connect(name)
+        self.curs = self.connection.cursor()
+   
+    def get_config(self) -> dict:
+        config = {
+            'token': None, 
+            'lang': None, 
+            'secret' : None
+        }
+        res = self.curs.execute('select * from settings;').fetchall()
+        config['token'] = res[0][1]
+        config['lang'] = res[0][2]
+        config['secret'] = res[0][3]
+
+        return config
+    
     def check_db(self) -> bool:
         checked = False
 
@@ -48,12 +41,14 @@ class DB_Writer(DB):
             res = self.curs.execute('select * from settings;').fetchall()
         except sqlite3.OperationalError:
             self.curs.execute(self.__create_query)
+            self.connection.commit()
         else:
             if len(res) > 0:
                 checked = True
-
         return checked
 
 
     def add_info(self, token: str, lang: str, secret: str):
         self.curs.execute(self.__insert_query.format(token, lang, secret))
+        self.connection.commit()
+        

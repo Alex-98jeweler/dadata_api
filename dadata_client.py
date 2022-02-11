@@ -9,7 +9,7 @@ class DadataClient:
 
     def get_suggestions(self, query: str) -> list:
         suggestions = []
-        buffer = self.client.suggest('address', query, count = 20, language = self.lang)
+        buffer = self.client.suggest('address', query, count = 20, language = self.lang, locations = [{'country':"*"}])
         for i in range(len(buffer)):
             suggestions.append(buffer[i]['value'])
         return suggestions
