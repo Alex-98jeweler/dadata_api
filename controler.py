@@ -3,9 +3,6 @@ from database import DB
 
 
 db = DB('settings.db')
-config = db.get_config()
-
-client = DadataClient(config['token'], config['secret'], config['lang'])
 
 def show_menu(menu: list) -> int:
     for i in range(len(menu)):
@@ -47,7 +44,7 @@ def print_suggestions(suggestions: list) -> str:
         return print_suggestions(suggestions)
     else:
         result = suggestions[choose - 1]
-        return  result
+    return  result
 
 def input_add_data():
     for i in range(3, 0, -1):
@@ -60,12 +57,9 @@ def input_add_data():
             else:
                 print("API ключ не валиден")
 
-def check_main_menu(number):
+def check_main_menu(number, client):
     if number == 1:
-        query = input('Введите ваш запрос\n>>> ')
-        # config = db.get_config()
-        # db.connection.close()
-        # client = DadataClient(config['token'], config['secret'], config['lang'])
+        query = input('Введите ваш запрос(город, улица, номера дома и квартиры)\n>>> ')
         suggestions = client.get_suggestions(query)
         address = print_suggestions(suggestions)
         if address == -1:
@@ -83,10 +77,12 @@ def run():
         input_add_data()
     else: 
         print("Рад что вы вернулись! Продолжим?")
+    config = db.get_config()
+    client = DadataClient(config['token'], config['secret'], config['lang'])
     menu = ['Найти географические координаты']
     choose = show_menu(menu)
     while choose != 0:
-        check_main_menu(choose)
+        check_main_menu(choose, client)
         choose = show_menu(menu)
     db.connection.close()
 

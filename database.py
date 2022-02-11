@@ -1,6 +1,9 @@
 import sqlite3
 
 class DB:
+    '''
+    Класс для взаимодействия с базой даннох для чтения и записи БД.
+    '''
     __create_query  = \
             '''
             CREATE TABLE settings (
@@ -22,6 +25,9 @@ class DB:
         self.curs = self.connection.cursor()
    
     def get_config(self) -> dict:
+        '''
+        Получение настроек из БД. Возвращает словарь с необходимыми значениями
+        '''
         config = {
             'token': None, 
             'lang': None, 
@@ -35,6 +41,9 @@ class DB:
         return config
     
     def check_db(self) -> bool:
+        '''
+        Проверяет есть ли в БД записи. Возвращает True если есть.
+        '''
         checked = False
 
         try:
