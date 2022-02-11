@@ -42,7 +42,8 @@ class DB:
     
     def check_db(self) -> bool:
         '''
-        Проверяет есть ли в БД записи. Возвращает True если есть.
+        Проверяет есть ли в БД записи. Возвращает True если есть, в ином случае создает таблицу, если 
+        ее нет, и возвращает False
         '''
         checked = False
 
@@ -58,6 +59,9 @@ class DB:
 
 
     def add_info(self, token: str, lang: str, secret: str):
+        '''
+        Добавляет данные в базу данныхю
+        '''
         self.curs.execute(self.__insert_query.format(token, lang, secret))
         self.connection.commit()
         

@@ -1,10 +1,17 @@
 from dadata_client import DadataClient
 from database import DB
 
+'''
+Модуль с основной логикой программы.
+'''
 
-db = DB('settings.db')
+db = DB('settings.db') # инициируем объект базы данных
 
 def show_menu(menu: list) -> int:
+    '''
+        Принимает на вход список строк необходимого меню, нумирует и отображает 
+        значения меню. Возвращает число которое вводит пользователь.
+    '''
     for i in range(len(menu)):
         print(f"{i + 1}. {menu[i]}")
     print('0. Выход')
@@ -13,6 +20,8 @@ def show_menu(menu: list) -> int:
     return choose
 
 def check_token(token : str) -> bool:
+    '''Проверяет доступность токена. Возвращает True если доступен, и False если нет'''
+
     res = False
     import requests
     import json
@@ -30,6 +39,8 @@ def check_token(token : str) -> bool:
     return res
 
 def print_suggestions(suggestions: list) -> str:
+    '''отображает подсказки в виде меню. отображает заново если введено число больше допустимого диапазона'''
+
     if len(suggestions) > 0:
         choose = show_menu(suggestions)
     else:
@@ -47,6 +58,8 @@ def print_suggestions(suggestions: list) -> str:
     return  result
 
 def input_add_data():
+    '''Запрашивает ввод данных, и добавляет их в БД для дальнейшей работы'''
+
     for i in range(3, 0, -1):
             token = input(f"Введите API ключ({i} попыток осталось)\n>>> ")
             if check_token(token):
@@ -58,6 +71,7 @@ def input_add_data():
                 print("API ключ не валиден")
 
 def check_main_menu(number, client):
+    '''Логика работы главного меню'''
     if number == 1:
         query = input('Введите ваш запрос(город, улица, номера дома и квартиры)\n>>> ')
         suggestions = client.get_suggestions(query)
@@ -71,19 +85,26 @@ def check_main_menu(number, client):
 
 
 def run():
-    config = None
-    if db.check_db() == False:
+    '''
+    Основная логика в которой выполняется основная программа.
+    '''
+    config = None # инициализируем переменную 
+
+    if db.check_db() == False: # проверяем записи в БД, если нет то запросим их ввод и объект БД занесет их
         print("Здравствуйте! Я Dadata-Client, я помогу Вам получить информацию из баз Dadata.\nДля начала работы введите следующие данные:")
         input_add_data()
     else: 
         print("Рад что вы вернулись! Продолжим?")
-    config = db.get_config()
-    client = DadataClient(config['token'], config['secret'], config['lang'])
-    menu = ['Найти географические координаты']
-    choose = show_menu(menu)
-    while choose != 0:
+
+    config = db.get_config() # получаем из БД конфигурацию
+    client = DadataClient(config['token'], config['secret'], config['lang']) # инициируем объект клиента Dadata
+    menu = ['Найти географические координаты'] # список главного меню
+    choose = show_menu(menu) # отображаем список в виде пронумерованного меню
+
+    while choose != 0: # основной цикл программы
         check_main_menu(choose, client)
         choose = show_menu(menu)
+
     db.connection.close()
 
         
